@@ -1,11 +1,11 @@
-#include "application/Application.h"
+#include "app/App.h"
 #include "Lexer.h"
 #include "parser/Parser.h"
 #include "visitor/PrintVisitor.h"
 
-Application::Application() : parser(Parser()) {}
+App::App() : parser(Parser()) {}
 
-void Application::run() {
+void App::run() {
   std::unique_ptr<FunctionAST> node;
   PrintVisitor printVisitor;
 
@@ -20,12 +20,13 @@ void Application::run() {
       break;
     case tok_function:
       node = parser.parseDefinition();
+      node->accept(printVisitor);
       break;
     default:
       node = parser.parseTopLevelExpr();
+      node->accept(printVisitor);
       break;
     }
 
-    node->accept(printVisitor);
   }
 }

@@ -2,13 +2,13 @@
 
 #include "parser/Parser.h"
 
-class Application {
+class App {
 
 private:
   Parser parser;
 
 public:
-  Application();
+  App();
 
   void run();
 };

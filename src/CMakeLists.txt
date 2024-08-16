@@ -1,5 +1,5 @@
 add_library(compiler
-  application/Application.cpp
+  app/App.cpp
   ast/BinaryExprAST.cpp
   ast/CallExprAST.cpp
   ast/FunctionAST.cpp
