@@ -1,15 +1,20 @@
 #include "Lexer.h"
-#include <_ctype.h>
 
-Lexer::Lexer() : lastChar(' ') {};
+#include <_ctype.h>
+#include <iostream>
+#include <string>
+
+Lexer::Lexer() : lastChar(' '), identifierStr(""), numValue(0){};
 
 int Lexer::nextToken() {
   while (isspace(lastChar))
     lastChar = getchar();
 
   if (isalpha(lastChar)) {
-    while (isalnum(lastChar = getchar()))
-	identifierStr += lastChar;
+    identifierStr = lastChar;
+
+    while (isalnum((lastChar = getchar())))
+      identifierStr += lastChar;
 
     if (identifierStr == "function")
       return tok_function;
