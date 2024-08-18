@@ -1,7 +1,6 @@
 #include "Lexer.h"
 
 #include <_ctype.h>
-#include <iostream>
 #include <string>
 
 Lexer::Lexer() : lastChar(' '), identifierStr(""), numValue(0){};

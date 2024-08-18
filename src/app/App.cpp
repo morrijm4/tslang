@@ -20,11 +20,11 @@ void App::run() {
       break;
     case tok_function:
       node = parser.parseDefinition();
-      node->accept(printVisitor);
+      if (node) node->accept(printVisitor);
       break;
     default:
       node = parser.parseTopLevelExpr();
-      node->accept(printVisitor);
+      if (node) node->accept(printVisitor);
       break;
     }
 

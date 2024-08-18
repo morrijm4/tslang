@@ -1,1 +1,3 @@
-x + y;
+function fib() {
+  a + b;
+}

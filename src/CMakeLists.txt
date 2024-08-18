@@ -1,4 +1,4 @@
-add_library(compiler
+add_library(app
   app/App.cpp
   ast/BinaryExprAST.cpp
   ast/CallExprAST.cpp
@@ -11,14 +11,18 @@ add_library(compiler
   visitor/PrintVisitor.cpp
 )
 
-target_include_directories(compiler PUBLIC
+target_include_directories(app PUBLIC
   ${CMAKE_SOURCE_DIR}/include/lexer
+  ${CMAKE_SOURCE_DIR}/include/app
+  ${CMAKE_SOURCE_DIR}/include/ast
+  ${CMAKE_SOURCE_DIR}/include/parser
+  ${CMAKE_SOURCE_DIR}/include/visitor
 )
 
-add_executable(emma
+add_executable(tslang
   main.cpp
 )
 
-target_link_libraries(emma
-  compiler
+target_link_libraries(tslang
+  app
 )

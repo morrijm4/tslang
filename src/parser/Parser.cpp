@@ -162,9 +162,7 @@ std::unique_ptr<PrototypeAST> Parser::parsePrototype() {
 
     if (currTok == tok_identifier)
       ArgNames.push_back(lexer.identifierStr);
-    else if (currTok == ',')
-      getNextToken(); // eat ','
-  } while (currTok == tok_identifier);
+  } while (currTok == tok_identifier || currTok == ',');
 
   if (currTok != ')') {
     fprintf(stderr, "expected ')' in prototype recieved %c\n", currTok);
@@ -179,8 +177,8 @@ std::unique_ptr<PrototypeAST> Parser::parsePrototype() {
 std::unique_ptr<FunctionAST> Parser::parseDefinition() {
   getNextToken(); // eat 'function'
 
-  auto Proto = parsePrototype();
-  if (!Proto)
+  auto proto = parsePrototype();
+  if (!proto)
     return nullptr;
 
   if (currTok != '{') {
@@ -190,9 +188,15 @@ std::unique_ptr<FunctionAST> Parser::parseDefinition() {
   }
   getNextToken(); // eat '{'
 
-  auto Expr = parseExpression();
-  if (!Expr)
+  if (currTok == '}') {
+    getNextToken();
+    return std::make_unique<FunctionAST>(std::move(proto), std::nullopt);
+  }
+
+  auto expr = parseExpression();
+  if (!expr)
     return nullptr;
+  getNextToken(); // eat ';'
 
   if (currTok != '}') {
     fprintf(stderr, "expected '}' for function definition recieved %c\n",
@@ -201,14 +205,14 @@ std::unique_ptr<FunctionAST> Parser::parseDefinition() {
   }
   getNextToken(); // eat '}'
 
-  return std::make_unique<FunctionAST>(std::move(Proto), std::move(Expr));
+  return std::make_unique<FunctionAST>(std::move(proto), std::move(expr));
 }
 
 std::unique_ptr<FunctionAST> Parser::parseTopLevelExpr() {
-  auto Expr = parseExpression();
-  if (!Expr)
+  auto expr = parseExpression();
+  if (!expr)
     return nullptr;
 
-  auto Proto = std::make_unique<PrototypeAST>("", std::vector<std::string>());
-  return std::make_unique<FunctionAST>(std::move(Proto), std::move(Expr));
+  auto proto = std::make_unique<PrototypeAST>("", std::vector<std::string>());
+  return std::make_unique<FunctionAST>(std::move(proto), std::move(expr));
 }

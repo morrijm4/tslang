@@ -17,7 +17,10 @@ void PrintVisitor::visit(FunctionAST &node) {
 
   nest([this, &node]() {
     node.proto->accept(*this);
-    node.body->accept(*this);
+
+    if (node.body.has_value()) {
+      node.body.value()->accept(*this);
+    }
   });
 }
 
