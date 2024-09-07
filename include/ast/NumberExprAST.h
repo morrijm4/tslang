@@ -9,4 +9,5 @@ public:
   NumberExprAST(double val);
 
   void accept(Visitor &visitor) override;
+  llvm::Value *accept(ValueVisitor &visitor) override;
 };

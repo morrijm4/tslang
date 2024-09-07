@@ -9,6 +9,7 @@ add_library(app
   lexer/Lexer.cpp
   parser/Parser.cpp
   visitor/PrintVisitor.cpp
+  visitor/CodegenVisitor.cpp
 )
 
 target_include_directories(app PUBLIC
@@ -29,7 +30,7 @@ add_executable(tslang
   main.cpp
 )
 
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+llvm_map_components_to_libnames(llvm_libs support core irreader passes analysis)
 
 target_link_libraries(tslang
   app

@@ -11,4 +11,5 @@ public:
   VariableExprAST(const std::string &name);
 
   void accept(Visitor &visitor) override;
+  llvm::Value *accept(ValueVisitor &visitor) override;
 };

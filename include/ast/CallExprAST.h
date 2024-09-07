@@ -16,4 +16,6 @@ public:
               std::vector<std::unique_ptr<ExprAST>> args);
 
   void accept(Visitor &visitor) override;
+
+  llvm::Value *accept(ValueVisitor &visitor) override;
 };

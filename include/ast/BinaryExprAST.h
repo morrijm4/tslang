@@ -14,4 +14,5 @@ public:
                 std::unique_ptr<ExprAST> RHS);
 
   void accept(Visitor &visitor) override;
+  llvm::Value *accept(ValueVisitor &visitor) override;
 };

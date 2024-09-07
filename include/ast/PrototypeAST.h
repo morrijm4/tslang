@@ -16,5 +16,7 @@ public:
 
   void accept(Visitor &visitor) override;
 
+  llvm::Value *accept(ValueVisitor &visitor) override;
+
   const std::string &getName();
 };

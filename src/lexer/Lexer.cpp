@@ -36,7 +36,8 @@ int Lexer::nextToken() {
       lastChar = getchar();
     } while (isdigit(lastChar) || lastChar == '.');
 
-    numValue = strtod(numStr.c_str(), 0);
+    numValue = strtod(numStr.c_str(), nullptr);
+    return tok_number;
   }
 
   if (lastChar == '#') {

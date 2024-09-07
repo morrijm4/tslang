@@ -1,6 +1,7 @@
 #include "ast/FunctionAST.h"
 #include "PrintVisitor.h"
 #include "visitor/Visitor.h"
+#include "visitor/ValueVisitor.h"
 #include <algorithm>
 #include <optional>
 
@@ -13,3 +14,5 @@ FunctionAST::FunctionAST(std::unique_ptr<PrototypeAST> proto,
 }
 
 void FunctionAST::accept(Visitor &visitor) { visitor.visit(*this); }
+
+llvm::Value* FunctionAST::accept(ValueVisitor &visitor) { return visitor.visit(*this); }

@@ -85,7 +85,7 @@ void PrintVisitor::visit(NumberExprAST &node) {
 void PrintVisitor::print(std::string str) {
   std::string padding(depth * spaceWidth, ' ');
 
-  std::cout << padding << str << std::endl;
+  std::cerr << padding << str << std::endl;
 }
 
 void PrintVisitor::nest(std::function<void()> func) {

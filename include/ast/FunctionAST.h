@@ -13,4 +13,6 @@ public:
               std::optional<std::unique_ptr<ExprAST>> body);
 
   void accept(Visitor &visitor) override;
+
+  llvm::Value *accept(ValueVisitor &visitor) override;
 };
