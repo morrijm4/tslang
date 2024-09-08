@@ -14,13 +14,20 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassInstrumentation.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/IR/Value.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/StandardInstrumentations.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/Host.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Scalar/Reassociate.h"
@@ -29,6 +36,7 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <vector>
 
 CodegenVisitor::CodegenVisitor()
@@ -46,6 +54,32 @@ CodegenVisitor::CodegenVisitor()
           *context, /* debug logging */ true))
 
 {
+  llvm::InitializeAllTargetInfos();
+  llvm::InitializeAllTargets();
+  llvm::InitializeAllTargetMCs();
+  llvm::InitializeAllAsmParsers();
+  llvm::InitializeAllAsmPrinters();
+
+  std::string targetTriple = llvm::sys::getDefaultTargetTriple();
+
+  std::string error;
+  const llvm::Target *target =
+      llvm::TargetRegistry::lookupTarget(targetTriple, error);
+
+  if (!target) {
+    llvm::errs() << error;
+  }
+
+  std::string cpu = "generic";
+  std::string features = "";
+  llvm::TargetOptions opt;
+
+  this->targetMachine = target->createTargetMachine(targetTriple, cpu, features,
+                                                    opt, llvm::Reloc::PIC_);
+
+  this->module->setDataLayout(this->targetMachine->createDataLayout());
+  this->module->setTargetTriple(targetTriple);
+
   standardInstrumentations->registerCallbacks(
       *this->passInstrumentationCallbacks, this->moduleAM.get());
 
@@ -61,10 +95,36 @@ CodegenVisitor::CodegenVisitor()
   llvm::PassBuilder passBuilder;
   passBuilder.registerModuleAnalyses(*this->moduleAM);
   passBuilder.registerFunctionAnalyses(*this->functionAM);
-  passBuilder.crossRegisterProxies(*this->loopAM, *this->functionAM, *this->callGraphAM, *this->moduleAM);
+  passBuilder.crossRegisterProxies(*this->loopAM, *this->functionAM,
+                                   *this->callGraphAM, *this->moduleAM);
 }
 
 void CodegenVisitor::print() { this->module->print(llvm::errs(), nullptr); }
+
+int CodegenVisitor::emitObjectFile() {
+
+  std::string filename = "output.o";
+  std::error_code errorCode;
+  llvm::raw_fd_ostream dest(filename, errorCode, llvm::sys::fs::OF_None);
+
+  if (errorCode) {
+    llvm::errs() << "Could not open file: " << errorCode.message();
+    return 1;
+  }
+
+  llvm::legacy::PassManager pass;
+  llvm::CodeGenFileType fileType = llvm::CodeGenFileType::ObjectFile;
+
+  if (this->targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
+    llvm::errs() << "TargetMachine can't emit a file of this type";
+    return 1;
+  }
+
+  pass.run(*this->module);
+  dest.flush();
+
+  return 0;
+}
 
 llvm::Value *CodegenVisitor::visit(BinaryExprAST &node) {
   llvm::Value *L = node.LHS->accept(*this);

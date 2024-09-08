@@ -5,6 +5,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/PassInstrumentation.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/StandardInstrumentations.h"
 
@@ -23,8 +24,11 @@ private:
   std::unique_ptr<llvm::FunctionAnalysisManager> functionAM;
   std::unique_ptr<llvm::CGSCCAnalysisManager> callGraphAM;
   std::unique_ptr<llvm::ModuleAnalysisManager> moduleAM;
-  std::unique_ptr<llvm::PassInstrumentationCallbacks> passInstrumentationCallbacks;
+  std::unique_ptr<llvm::PassInstrumentationCallbacks>
+      passInstrumentationCallbacks;
   std::unique_ptr<llvm::StandardInstrumentations> standardInstrumentations;
+
+  llvm::TargetMachine *targetMachine;
 
   std::map<std::string, llvm::Value *> namedValues;
 
@@ -32,6 +36,8 @@ public:
   CodegenVisitor();
 
   void print();
+
+  int emitObjectFile();
 
   llvm::Value *visit(BinaryExprAST &node) override;
   llvm::Value *visit(CallExprAST &node) override;

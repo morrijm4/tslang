@@ -8,7 +8,7 @@
 
 App::App() : parser(Parser()) {}
 
-void App::run() {
+int App::run() {
   std::unique_ptr<FunctionAST> node;
   PrintVisitor printVisitor;
   CodegenVisitor codegenVisitor;
@@ -20,21 +20,21 @@ void App::run() {
     case tok_eof:
       std::cout << "\n\n\n";
       codegenVisitor.print();
-      return;
+      return codegenVisitor.emitObjectFile();
     case ';':
       parser.getNextToken();
       break;
     case tok_function:
       node = parser.parseDefinition();
       if (node) {
-	node->accept(printVisitor);
+	// node->accept(printVisitor);
 	node->accept(codegenVisitor);
       }
       break;
     default:
       node = parser.parseTopLevelExpr();
       if (node) {
-	node->accept(printVisitor);
+	// node->accept(printVisitor);
 	node->accept(codegenVisitor);
       }
       break;

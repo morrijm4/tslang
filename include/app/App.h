@@ -10,5 +10,5 @@ private:
 public:
   App();
 
-  void run();
+  int run();
 };
